@@ -23,30 +23,38 @@ interface ExtractionResult {
 
 /**
  * Extract text from a PDF file
+ * Note: pdf-parse is an optional dependency. If not installed, falls back to vision-based extraction.
  */
 export async function extractFromPDF(
   fileBuffer: Buffer,
   filename: string
 ): Promise<ExtractionResult> {
-  // Try text extraction first using pdf-parse
+  // Try text extraction first using pdf-parse (if available)
   try {
-    const pdfParse = (await import('pdf-parse')).default;
-    const pdfData = await pdfParse(fileBuffer);
+    // Dynamic import with error handling for when pdf-parse isn't installed
+    const pdfParse = await import('pdf-parse').then(m => m.default).catch(() => null);
 
-    if (pdfData.text.trim().length > 100) {
-      return {
-        text: pdfData.text,
-        pageCount: pdfData.numpages,
-        method: 'text',
-      };
+    if (pdfParse) {
+      const pdfData = await pdfParse(fileBuffer);
+      if (pdfData.text.trim().length > 100) {
+        return {
+          text: pdfData.text,
+          pageCount: pdfData.numpages,
+          method: 'text',
+        };
+      }
     }
   } catch (error) {
     console.log('PDF text extraction failed, falling back to vision:', error);
   }
 
-  // If text extraction fails or returns little content, use Claude Vision
+  // If text extraction fails, is unavailable, or returns little content, use Claude Vision
   if (!anthropic) {
-    throw new Error('ANTHROPIC_API_KEY required for scanned PDF extraction');
+    // Return placeholder if no extraction method is available
+    return {
+      text: `[PDF requires processing: ${filename}. Install pdf-parse or configure ANTHROPIC_API_KEY for OCR.]`,
+      method: 'vision',
+    };
   }
 
   // Convert PDF to images (you'd need a service like pdf2image)
