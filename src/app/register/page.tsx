@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,7 +44,33 @@ function formatPhoneNumber(value: string): string {
   }
 }
 
+// Loading fallback for Suspense
+function RegisterFormSkeleton() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary-50 via-blue-50/30 to-white py-12">
+      <div className="card max-w-2xl w-full shadow-xl overflow-hidden animate-pulse">
+        <div className="bg-gradient-to-br from-primary-600 to-primary-700 px-6 pt-8 pb-6 h-32" />
+        <div className="p-8 space-y-6">
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main page wrapper with Suspense
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterFormSkeleton />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+// The actual form component that uses useSearchParams
+function RegisterForm() {
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
