@@ -14,6 +14,7 @@ const FROM_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 interface WelcomeSMSParams {
   to: string;
   name: string;
+  language?: 'en' | 'es';
 }
 
 export async function sendWelcomeSMS({ to, name }: WelcomeSMSParams) {

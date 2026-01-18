@@ -15,6 +15,7 @@ interface WelcomeEmailParams {
   to: string;
   name: string;
   licenseTrack: 'A' | 'B' | 'both';
+  language?: 'en' | 'es';
 }
 
 export async function sendWelcomeEmail({ to, name, licenseTrack }: WelcomeEmailParams) {

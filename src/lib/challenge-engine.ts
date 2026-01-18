@@ -72,7 +72,7 @@ export async function selectChallengeQuestions(
         .eq('is_verified', true)
         .in('license_type', [licenseType, 'both'])
         .eq('difficulty', difficulty)
-        .not('id', 'in', `(${[...selectedQuestions, ...answeredIds].join(',') || 'null'})`)
+        .not('id', 'in', `(${[...selectedQuestions, ...Array.from(answeredIds)].join(',') || 'null'})`)
         .limit(remaining);
 
       if (newQuestions) {

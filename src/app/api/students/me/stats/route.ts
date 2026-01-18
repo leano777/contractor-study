@@ -44,13 +44,14 @@ export async function GET() {
     const correctAnswers = responses?.filter(r => r.is_correct).length || 0;
     const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
 
-    // Get challenges completed
-    const { count: challengesCompleted } = await supabase
-      .from('daily_challenges')
-      .select('id', { count: 'exact', head: true })
-      .in('id', 
-        [...new Set(responses?.map(r => r.challenge_id) || [])]
-      );
+    // Get challenges completed (count distinct dates with completed challenges)
+    const completedDates = new Set<string>();
+    responses?.forEach(r => {
+      if (r.answered_at) {
+        completedDates.add(r.answered_at.split('T')[0]);
+      }
+    });
+    const challengesCompleted = completedDates.size;
 
     // Topic breakdown
     const topicBreakdown: Record<string, { total: number; correct: number; accuracy: number }> = {};
